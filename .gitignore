@@ -15,6 +15,7 @@ dist-ssr
 # Reference media (large / copyrighted — not part of the source)
 *.mp4
 *.mp3
+!public/audio/dreaming-of-the-crash.mp3
 astronaut-v1-lod0.glb
 Screenshot*.png
 
