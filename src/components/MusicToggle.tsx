@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 
 const SRC = '/audio/dreaming-of-the-crash.mp3';
-// The track's quiet intro is skipped: playback starts on the full entrance (1:53.5)
-// and loops back before the closing fade (3:45).
-const START = 113.5;
-const END = 225;
+// The track's quiet intro is skipped: playback starts on the full entrance (1:38)
+// and loops back before the closing fade (3:55). The reverb tail needs a longer
+// loop crossfade than a dry mix would, so the seam doesn't sound cut off.
+const START = 98;
+const END = 235;
 const LEVEL = 0.6;
 const FADE_IN = 2.5;
-const FADE_OUT = 0.8;
-const LOOP_FADE = 2.5;
+const FADE_OUT = 1.2;
+const LOOP_FADE = 4;
 
 interface Player {
   el: HTMLAudioElement;
