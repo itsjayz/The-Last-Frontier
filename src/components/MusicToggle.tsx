@@ -6,7 +6,7 @@ const SRC = '/audio/dreaming-of-the-crash.mp3';
 // loop crossfade than a dry mix would, so the seam doesn't sound cut off.
 const START = 98;
 const END = 235;
-const LEVEL = 0.6;
+const LEVEL = 0.48; // 20% quieter than the original 0.6
 const FADE_IN = 2.5;
 const FADE_OUT = 1.2;
 const LOOP_FADE = 4;
