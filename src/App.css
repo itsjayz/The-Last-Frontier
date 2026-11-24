@@ -1,0 +1,600 @@
+/*
+ * Colour: white on black, with black-on-white chips (labels, the CTA, Return to
+ * Earth on hover) where a mark needs to cut through the image. No grey text.
+ */
+
+.stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: #000;
+}
+
+.stage__canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* vgpu environments: underneath, faded in by the Crossing (opacity set per frame). */
+.stage__canvas--hole {
+  opacity: 0;
+}
+
+/* Three.js: transparent wherever nothing solid is drawn. */
+.stage__canvas--main {
+  opacity: 0;
+  transition: opacity 2.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.stage.is-ready .stage__canvas--main {
+  opacity: 1;
+}
+
+.stage--fallback {
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  color: var(--white);
+  font: 0.8rem/1.6 var(--mono);
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+/* ── Loader ─────────────────────────────────────────────────────────────── */
+html.is-loading,
+html.is-loading body {
+  overflow: hidden;
+}
+
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 1.6rem;
+  background: var(--black);
+  color: var(--white);
+  transition:
+    opacity 1.2s ease 0.3s,
+    visibility 0s linear 1.5s;
+}
+
+.loader.is-done {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.loader__title {
+  margin: 0;
+  font: 400 clamp(2.4rem, 6vw, 4.8rem) / 1 var(--display);
+  letter-spacing: -0.01em;
+}
+
+.loader__bar {
+  width: min(70vw, 22rem);
+  height: 1px;
+  background: rgba(255, 255, 255, 0.18);
+  overflow: hidden;
+}
+
+.loader__fill {
+  display: block;
+  height: 100%;
+  background: var(--white);
+  transform-origin: left center;
+  transition: transform 0.9s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.loader__meta {
+  width: min(70vw, 22rem);
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font: 400 0.66rem/1.4 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* ── Return-to-Earth fade ───────────────────────────────────────────────── */
+.veil {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  background: var(--black);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.veil.is-on {
+  opacity: 1;
+}
+
+/* ── Mission identity, fixed at the frame edges ─────────────────────────── */
+.mission-mark {
+  position: fixed;
+  inset: clamp(1rem, 2.6vw, 2rem) clamp(1rem, 3vw, 2.5rem) auto;
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  font: 400 0.68rem/1 var(--mono);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--white);
+  mix-blend-mode: difference;
+}
+
+/* ── Return to Earth ────────────────────────────────────────────────────── */
+.return-earth {
+  position: fixed;
+  left: clamp(1rem, 3vw, 2.5rem);
+  bottom: clamp(1rem, 2.6vw, 2rem);
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.75rem 1.1rem 0.75rem 0.85rem;
+  border: 1px solid var(--white);
+  border-radius: 999px;
+  background: var(--black);
+  color: var(--white);
+  font: 500 0.68rem/1 var(--sans);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease,
+    background 0.3s ease,
+    color 0.3s ease;
+}
+
+.return-earth.is-visible {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.return-earth:hover,
+.return-earth:focus-visible {
+  background: var(--white);
+  color: var(--black);
+}
+
+.return-earth:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 3px;
+}
+
+/* A tiny Earth: a disc with a lit crescent. */
+.return-earth__icon {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  box-shadow: inset -0.28rem 0 0 0 currentColor;
+}
+
+/* ── Chapters: scroll length sets the pace ──────────────────────────────── */
+.chapter {
+  position: relative;
+  z-index: 1;
+}
+
+.chapter--departure {
+  height: 480vh;
+}
+.chapter--crossing {
+  height: 560vh;
+}
+.chapter--transit {
+  height: 380vh;
+}
+.chapter--discovery {
+  height: 380vh;
+}
+.chapter--arrival {
+  height: 400vh;
+}
+.chapter--possibility {
+  height: 340vh;
+}
+
+/* A sticky frame per chapter holds its words over the image. */
+.chapter__frame {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  padding: clamp(4.5rem, 11vh, 8rem) clamp(1.25rem, 7vw, 7rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  pointer-events: none;
+}
+
+.chapter__frame--lower-left {
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+.chapter__frame--upper-left {
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+.chapter__frame--upper-right {
+  justify-content: flex-start;
+  align-items: flex-end;
+  text-align: right;
+}
+.chapter__frame--top-center {
+  justify-content: flex-start;
+  align-items: center;
+  text-align: center;
+}
+.chapter__frame--center {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* Label: a small black-on-white chip, so it reads over any image. */
+.chapter__label {
+  margin: 0;
+  padding: 0.38em 0.6em 0.32em;
+  background: var(--white);
+  color: var(--black);
+  font: 500 0.66rem/1 var(--mono);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0; /* revealed by scroll; stays in the accessibility tree */
+}
+
+/* Beats share one spot: each replaces the last. */
+.chapter__beats {
+  display: grid;
+}
+
+.chapter__frame--upper-right .chapter__beats {
+  justify-items: end;
+}
+.chapter__frame--top-center .chapter__beats,
+.chapter__frame--center .chapter__beats {
+  justify-items: center;
+}
+
+/* Editorial statement: plain clause, then the italic turn. Pure white. */
+.chapter__statement {
+  grid-area: 1 / 1;
+  margin: 0;
+  max-width: 15ch;
+  font: 400 clamp(2.3rem, 5.4vw, 5.6rem) / 0.98 var(--display);
+  letter-spacing: -0.012em;
+  color: var(--white);
+  text-wrap: balance;
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.5),
+    0 0 36px rgba(0, 0, 0, 0.7);
+}
+
+.chapter__frame--top-center .chapter__statement,
+.chapter__frame--center .chapter__statement {
+  max-width: 18ch;
+}
+
+.chapter__line {
+  display: inline-block;
+  opacity: 0;
+}
+
+.chapter__line--turn {
+  font-style: italic;
+}
+
+/* Mission notes: black-on-white keys, white values. */
+.chapter__notes {
+  margin: 1.4rem 0 0;
+  display: grid;
+  gap: 0.6rem;
+  font: 400 0.68rem/1.4 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.chapter__note {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: flex-end;
+  opacity: 0;
+}
+
+.chapter__note dt {
+  padding: 0.3em 0.5em 0.25em;
+  background: var(--white);
+  color: var(--black);
+}
+
+.chapter__note dd {
+  margin: 0;
+  color: var(--white);
+  text-shadow: 0 0 18px rgba(0, 0, 0, 0.8);
+}
+
+/* ── Intro card (first screen) ──────────────────────────────────────────── */
+/*
+ * Two parts with their own space: the title group (eyebrow → heading →
+ * description, tight together) and the scroll invitation at the bottom.
+ * Default (portrait / narrower screens): the group sits at the top, above the
+ * astronaut. Wide screens: it moves into the empty dark column on the right,
+ * clear of the astronaut (centre) and Earth (lower left).
+ */
+.chapter__intro {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  padding: clamp(4.75rem, 11vh, 7rem) clamp(1.25rem, 7vw, 7rem) clamp(1.75rem, 5.5vh, 3.25rem);
+}
+
+.intro__group {
+  align-self: start;
+  display: grid;
+  justify-items: start;
+  max-width: 34rem;
+}
+
+/* Arrives after the loader (separate from the scroll fade on the wrapper). */
+.intro__group > *,
+.intro__cue {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 1.4s ease,
+    transform 1.4s ease;
+}
+
+html.is-loaded .intro__group > *,
+html.is-loaded .intro__cue {
+  opacity: 1;
+  transform: none;
+}
+html.is-loaded .intro__group > :nth-child(1) {
+  transition-delay: 1.2s;
+}
+html.is-loaded .intro__group > :nth-child(2) {
+  transition-delay: 1.45s;
+}
+html.is-loaded .intro__group > :nth-child(3) {
+  transition-delay: 1.8s;
+}
+html.is-loaded .intro__cue {
+  transition-delay: 2.8s;
+}
+
+/* Eyebrow: small, tracked, quiet — context, not content. */
+.intro__eyebrow {
+  margin: 0 0 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.9rem;
+  font: 500 0.64rem/1.5 var(--mono);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--white);
+}
+
+.intro__eyebrow-rule {
+  width: 1.75rem;
+  height: 1px;
+  background: var(--white);
+}
+
+/* Heading: the dominant element. */
+.intro__title {
+  margin: 0;
+  font: 400 clamp(3.2rem, 6.2vw, 8.5rem) / 0.88 var(--display);
+  letter-spacing: -0.02em;
+  color: var(--white);
+}
+
+.intro__title-line {
+  display: block;
+}
+
+/* Description: tucked under the heading, one group with it. */
+.intro__line {
+  margin: 1.35rem 0 0;
+  max-width: min(28ch, 34vw);
+  font: 400 clamp(0.98rem, 1.2vw, 1.15rem) / 1.55 var(--sans);
+  color: var(--white);
+  text-shadow: 0 0 24px rgba(0, 0, 0, 0.8);
+}
+
+/* Scroll invitation: its own row at the bottom, away from the heading. */
+.intro__cue {
+  align-self: end;
+  justify-self: end;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  font: 500 0.64rem/1 var(--mono);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--white);
+}
+
+.intro__cue-line {
+  width: 2.6rem;
+  height: 1px;
+  background: var(--white);
+  transform-origin: left;
+  animation: cue 2.4s ease-in-out infinite;
+}
+
+@keyframes cue {
+  0%,
+  100% {
+    transform: scaleX(0.3);
+  }
+  50% {
+    transform: scaleX(1);
+  }
+}
+
+/* Wide screens: the empty dark column to the right of the astronaut. */
+@media (min-aspect-ratio: 8/5) and (min-width: 900px) {
+  .chapter__intro {
+    padding-top: clamp(6rem, 22vh, 13rem);
+    padding-left: 71vw;
+    padding-right: clamp(1.25rem, 4vw, 3.5rem);
+  }
+  .intro__title {
+    font-size: clamp(3.4rem, 7.3vw, 9rem);
+  }
+  .intro__line {
+    max-width: 28ch;
+  }
+  /* The cue shares the group's left edge: one column, top to bottom. */
+  .intro__cue {
+    justify-self: start;
+  }
+}
+
+/* Phones: the heading on one line, so the group clears the astronaut below. */
+@media (max-width: 600px) {
+  .intro__title {
+    font-size: 12.4vw;
+  }
+  .intro__title-line {
+    display: inline;
+  }
+  .intro__eyebrow {
+    margin-bottom: 1.1rem;
+  }
+  .intro__line {
+    margin-top: 1rem;
+    max-width: 30ch;
+  }
+}
+
+/* ── The invitation ─────────────────────────────────────────────────────── */
+.invitation {
+  margin-top: 2.2rem;
+  display: grid;
+  justify-items: center;
+  gap: 1.1rem;
+  visibility: hidden;
+  pointer-events: auto;
+}
+
+/* The one CTA: black on white, the brightest mark on the page. */
+.invitation__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1.05rem 1.7rem;
+  border: 1px solid var(--white);
+  border-radius: 999px;
+  font: 600 0.78rem/1 var(--sans);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--black);
+  text-decoration: none;
+  background: var(--white);
+  transition:
+    background 0.35s ease,
+    color 0.35s ease;
+}
+
+.invitation__cta:hover,
+.invitation__cta:focus-visible {
+  background: var(--black);
+  color: var(--white);
+}
+
+.invitation__cta:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 4px;
+}
+
+.invitation__arrow {
+  transition: transform 0.4s ease;
+}
+
+.invitation__cta:hover .invitation__arrow {
+  transform: translateX(4px);
+}
+
+.invitation__note {
+  margin: 0;
+  max-width: 34ch;
+  font: 400 0.9rem/1.5 var(--sans);
+  color: var(--white);
+  text-shadow: 0 0 18px rgba(0, 0, 0, 0.9);
+}
+
+.invitation__credits {
+  /* Bottom-right corner: clear of the astronaut and the Return button. */
+  position: absolute;
+  right: clamp(1.25rem, 3vw, 2.5rem);
+  bottom: clamp(1rem, 2.6vw, 2rem);
+  max-width: 44ch;
+  margin: 0;
+  text-align: right;
+  font: 400 0.6rem/1.6 var(--mono);
+  letter-spacing: 0.06em;
+  color: var(--white);
+  text-shadow: 0 0 12px rgba(0, 0, 0, 0.9);
+}
+
+@media (max-width: 720px) {
+  /* Phones: the astronaut sits low in the final shot, so the invitation rises. */
+  .chapter__frame--center {
+    justify-content: flex-start;
+    padding-top: 14vh;
+  }
+  .invitation__credits {
+    left: 1.25rem;
+    bottom: 4.6rem; /* above the Return button */
+    max-width: none;
+    text-align: left;
+  }
+  .chapter__frame--upper-right {
+    align-items: flex-start;
+    text-align: left;
+  }
+  .chapter__frame--upper-right .chapter__beats {
+    justify-items: start;
+  }
+  .chapter__note {
+    justify-content: flex-start;
+  }
+  .mission-mark__meta {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage__canvas--main,
+  .intro__group > *,
+  .intro__cue,
+  .veil,
+  .loader {
+    transition: none;
+  }
+  .intro__cue-line {
+    animation: none;
+  }
+}
